@@ -44,7 +44,13 @@ class SGDM(Optimizer):
         #############################################################################
         # TODO: Implement the SGD + Momentum                                        #
         #############################################################################
-        pass
+        for layer in self.net.layers:
+            for n, dv in layer.grads.items():
+                if n not in self.velocity:
+                    self.velocity[n] = np.zeros_like(dv)
+                self.velocity[n] = self.momentum * self.velocity[n] - self.lr * dv
+                layer.params[n] += self.velocity[n]                    
+                # layer.params[n] -= self.lr * dv
         #############################################################################
         #                             END OF YOUR CODE                              #
         #############################################################################
@@ -63,7 +69,12 @@ class RMSProp(Optimizer):
         #############################################################################
         # TODO: Implement the RMSProp                                               #
         #############################################################################
-        pass
+        for layer in self.net.layers:
+            for n, dv in layer.grads.items():
+                if n not in self.cache:
+                    self.cache[n] = np.zeros_like(dv)
+                self.cache[n] = self.decay * self.cache[n] + (1 - self.decay) * np.square(dv)
+                layer.params[n] -= (self.lr * dv) / np.sqrt(self.cache[n] + self.eps)
         #############################################################################
         #                             END OF YOUR CODE                              #
         #############################################################################
@@ -84,7 +95,21 @@ class Adam(Optimizer):
         #############################################################################
         # TODO: Implement the Adam                                                  #
         #############################################################################
-        pass
+        self.t += 1
+        for layer in self.net.layers:
+            for n, dv in layer.grads.items():
+                if n not in self.mt:
+                    self.mt[n] = np.zeros_like(dv)
+                self.mt[n] = self.beta1 * self.mt[n] + (1 - self.beta1) * dv
+                
+                if n not in self.vt:
+                    self.vt[n] = np.zeros_like(dv)
+                self.vt[n] = self.beta2 * self.vt[n] + (1 - self.beta2) * np.square(dv)
+                
+                _mt = self.mt[n] / (1 - np.power(self.beta1, self.t))
+                _vt = self.vt[n] / (1 - np.power(self.beta2, self.t))
+                             
+                layer.params[n] -= (self.lr * _mt) / (np.sqrt(_vt) + self.eps)    
         #############################################################################
         #                             END OF YOUR CODE                              #
         #############################################################################

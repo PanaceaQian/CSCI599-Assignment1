@@ -315,7 +315,13 @@ class cross_entropy(object):
         # TODO: Implement the forward pass of an CE Loss                            #
         # Store the loss in the variable loss provided above.                       #
         #############################################################################
+        # print("feat shape is {}, label shape is {}".format(feat.shape, label.shape))
+        # print("label is {}".format(label))
+        one_hot_label = np.eye(feat.shape[-1])[label]
+        loss = -np.sum(one_hot_label * np.log(logit))
         
+        if self.size_average:
+            loss /= feat.shape[0]
         #############################################################################
         #                             END OF YOUR CODE                              #
         #############################################################################
@@ -333,7 +339,9 @@ class cross_entropy(object):
         # TODO: Implement the backward pass of an CE Loss                           #
         # Store the output gradients in the variable dlogit provided above.         #
         #############################################################################
-
+        dlogit = logit - np.eye(logit[-1].shape[0])[label]
+        if self.size_average:
+            dlogit /= label.shape[0]
         #############################################################################
         #                             END OF YOUR CODE                              #
         #############################################################################
@@ -348,7 +356,9 @@ def softmax(feat):
     #############################################################################
     # TODO: Implement the forward pass of a softmax function                    #
     #############################################################################
-    scores = np.exp(feat) / np.sum(np.exp(feat), axis=1)
+    broadcast = np.sum(np.exp(feat), axis=1)[:, np.newaxis]
+    # print("the shape of boradcasted one is {}".format(broadcast.shape))
+    scores = np.exp(feat) / broadcast
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################

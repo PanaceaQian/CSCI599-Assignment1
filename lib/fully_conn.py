@@ -46,7 +46,12 @@ class SmallFullyConnectedNetwork(Module):
     def __init__(self, keep_prob=0, dtype=np.float32, seed=None):
         self.net = sequential(
             ########## TODO: ##########
-
+            flatten(),
+            fc(4, 30, name="fc_1"),
+            relu(name="relu_1"),
+            
+            fc(30, 7, name="fc_2"),
+            relu(name="relu_2")
             ########### END ###########
         )
 
@@ -72,7 +77,14 @@ class TinyNet(Module):
         """ Some comments """
         self.net = sequential(
             ########## TODO: ##########
-
+            flatten(),
+            fc(3072, 512, name="fc_1"),
+            relu(name="relu_1"),
+            dropout(0.75, seed=seed),
+            
+            fc(512, 128, name="fc_2"),
+            relu(name="relu_2"),
+            fc(128, 10, name="fc_softmax")
             ########### END ###########
         )
 

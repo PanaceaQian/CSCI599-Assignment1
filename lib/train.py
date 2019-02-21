@@ -152,14 +152,22 @@ def train_net(data, model, loss_func, optimizer, batch_size, max_epochs,
             # pass to the network, and make a step for the optimizer.                   #
             # Store the loss to loss_hist                                               #
             #############################################################################
-            pass
+            output = model.forward(data_batch, is_Training=True)
+            loss = loss_func.forward(output, labels_batch)
+            
+            dlogit = loss_func.backward()
+            model.backward(dlogit)
+            
+            optimizer.step()
+            
+            loss_hist.append(loss)
             #############################################################################
             #                             END OF YOUR CODE                              #
             #############################################################################
 
             # Show the training loss
             if verbose and iter % show_every == 0:
-                print ("(Iteration {} / {}) loss: {}".format(iter+1, max_iters, loss_hist[-1]))
+                    print ("(Iteration {} / {}) loss: {}".format(iter+1, max_iters, loss_hist[-1]))
 
         # End of epoch, compute the accuracies
         train_acc = 0
@@ -169,7 +177,9 @@ def train_net(data, model, loss_func, optimizer, batch_size, max_epochs,
         # compute_acc method, store the results to train_acc and val_acc,           #
         # respectively                                                              #
         #############################################################################
-        pass
+        # compute_acc(model, data, labels, num_samples=None, batch_size=100)
+        train_acc = compute_acc(model, data_train, labels_train, batch_size=batch_size)
+        val_acc = compute_acc(model, data_val, labels_val, batch_size=batch_size)
         #############################################################################
         #                             END OF YOUR CODE                              #
         #############################################################################
@@ -182,7 +192,9 @@ def train_net(data, model, loss_func, optimizer, batch_size, max_epochs,
             # TODO: Save the optimal parameters to opt_params variable by name using    #
             # model.net.gather_params method                                            #
             #############################################################################
-            pass
+            opt_val_acc = val_acc
+            model.net.gather_params()
+            opt_params = model.net.params
             #############################################################################
             #                             END OF YOUR CODE                              #
             #############################################################################

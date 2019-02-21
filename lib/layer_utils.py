@@ -95,7 +95,8 @@ class flatten(object):
         # You need to reshape (flatten) the input features.                         #
         # Store the results in the variable output provided above.                  #
         #############################################################################
-
+        batch_size = feat.shape[0]
+        output = feat.reshape(batch_size, -1)
         #############################################################################
         #                             END OF YOUR CODE                              #
         #############################################################################
@@ -112,7 +113,7 @@ class flatten(object):
         # You need to reshape (flatten) the input gradients and return.             #
         # Store the results in the variable dfeat provided above.                  #
         #############################################################################
-
+        dfeat = dprev.reshape(feat.shape)
         #############################################################################
         #                             END OF YOUR CODE                              #
         #############################################################################
@@ -152,7 +153,8 @@ class fc(object):
         # You will probably need to reshape the input features.                     #
         # Store the results in the variable output provided above.                  #
         #############################################################################
-
+        W, b = self.params[self.w_name], self.params[self.b_name]
+        output = np.dot(feat, W) + b
         #############################################################################
         #                             END OF YOUR CODE                              #
         #############################################################################
@@ -175,7 +177,10 @@ class fc(object):
         # corresponding name.                                                       #
         # Store the output gradients in the variable dfeat provided above.          #
         #############################################################################
-
+        self.grads[self.w_name] = np.dot(feat.T, dprev)
+        self.grads[self.b_name] = np.sum(dprev, axis=0)
+        
+        dfeat = np.dot(dprev, self.params[self.w_name].T)
         #############################################################################
         #                             END OF YOUR CODE                              #
         #############################################################################
@@ -202,7 +207,7 @@ class relu(object):
         # TODO: Implement the forward pass of a rectified linear unit               #
         # Store the results in the variable output provided above.                  #
         #############################################################################
-
+        output = np.maximum(feat, 0)
         #############################################################################
         #                             END OF YOUR CODE                              #
         #############################################################################
@@ -219,7 +224,7 @@ class relu(object):
         # TODO: Implement the backward pass of a rectified linear unit              #
         # Store the output gradients in the variable dfeat provided above.          #
         #############################################################################
-
+        dfeat = np.multiply(dprev, np.heaviside(feat, 0))
         #############################################################################
         #                             END OF YOUR CODE                              #
         #############################################################################
@@ -260,7 +265,12 @@ class dropout(object):
         # Store the mask in the variable kept provided above.                       #
         # Store the results in the variable output provided above.                  #
         #############################################################################
-
+        if is_training:
+            kept = (np.random.rand(*feat.shape) < self.keep_prob).astype(float)
+            # print("kept is {}, prob is {}".format(kept, self.keep_prob))
+        else:
+            kept = np.ones(feat.shape)
+        output = np.multiply(feat, kept)            
         #############################################################################
         #                             END OF YOUR CODE                              #
         #############################################################################
@@ -278,7 +288,7 @@ class dropout(object):
         # TODO: Implement the backward pass of Dropout                              #
         # Store the output gradients in the variable dfeat provided above.          #
         #############################################################################
-
+        dfeat = np.multiply(dprev, self.kept)
         #############################################################################
         #                             END OF YOUR CODE                              #
         #############################################################################
@@ -305,7 +315,7 @@ class cross_entropy(object):
         # TODO: Implement the forward pass of an CE Loss                            #
         # Store the loss in the variable loss provided above.                       #
         #############################################################################
-
+        
         #############################################################################
         #                             END OF YOUR CODE                              #
         #############################################################################
@@ -338,7 +348,7 @@ def softmax(feat):
     #############################################################################
     # TODO: Implement the forward pass of a softmax function                    #
     #############################################################################
-
+    scores = np.exp(feat) / np.sum(np.exp(feat), axis=1)
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
